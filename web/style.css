@@ -1,0 +1,323 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+
+
+* {
+    padding: 0;
+    margin: 0;
+    font-family: Lato;
+}
+
+
+body {
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background: #111;
+    color: #fff;
+}
+
+.container {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    transform: scale(.8);
+}
+
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 2rem;
+}
+
+h2 {
+    font-family: Lato;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 43px;
+    letter-spacing: 0em;
+    text-align: center;
+    color: #fff;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+input:checked+.toggle-slider {
+    background-color: #007bff;
+}
+
+input:checked+.toggle-slider:before {
+    transform: translateX(26px);
+}
+
+#toggle-status {
+    margin-left: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+}
+
+.form-group label {
+    font-family: Lato;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: 0em;
+    text-align: left;
+    color: #fff;
+}
+
+.form-group input {
+    width: 96%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background: #EEEEEE;
+    font-size: 16px;
+}
+
+.remember-forgot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 16px;
+    font-family: Lato;
+    font-weight: 400;
+    line-height: 23px;
+    letter-spacing: 0em;
+    text-align: left;
+}
+
+.remember-forgot a {
+    color: #A09F99;
+}
+
+.login-button {
+    background-color: #388AED;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    padding: 10px;
+}
+
+.signup-link {
+    text-align: center;
+    font-size: 13px;
+    color: #fff;
+}
+
+.signup-link a {
+    color: #388AED;
+    font-weight: 600;
+}
+
+
+@media screen and (max-width: 780px) {
+    body {
+        display: flex;
+        justify-content: space-around;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transform: scale(1);
+    }
+
+    form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        padding: 0rem;
+    }
+
+    h2 {
+        font-family: Lato;
+        font-size: 36px;
+        font-weight: 700;
+        line-height: 43px;
+        letter-spacing: 0em;
+        text-align: center;
+        margin-bottom: 100px;
+    }
+
+    .toggle-container {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+    }
+
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+    .toggle-switch input {
+        display: none;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        border-radius: 34px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: #fff;
+        border-radius: 50%;
+        transition: transform 0.3s;
+    }
+
+    input:checked+.toggle-slider {
+        background-color: #007bff;
+    }
+
+    input:checked+.toggle-slider:before {
+        transform: translateX(26px);
+    }
+
+    #toggle-status {
+        margin-left: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: .5rem;
+        width: 90%;
+        overflow: hidden;
+
+    }
+
+    .form-group label {
+        font-family: Lato;
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 21px;
+        letter-spacing: 0em;
+        text-align: left;
+    }
+
+    .form-group input {
+        padding: 15px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background: #EEEEEE;
+        font-size: 18px;
+
+    }
+
+    .remember-forgot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        font-size: 10px;
+        font-family: Lato;
+        font-weight: 400;
+        line-height: 23px;
+        letter-spacing: 0em;
+        text-align: left;
+        width: 90%;
+    }
+
+    .remember-forgot a {
+        color: #A09F99;
+    }
+
+    .login-button {
+        background-color: #388AED;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 20px;
+        width: 90%;
+        padding: 10px;
+    }
+
+    .signup-link {
+        text-align: center;
+        font-size: 16px;
+    }
+
+    .signup-link a {
+        color: #388AED;
+        font-weight: 600;
+    }
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Send to mail</title>
+    <link rel="stylesheet" href="insertresult.css" />
+  </head>
+  <body>
+    <div class="top-section">
+      <img src="images/logo.png" alt="" srcset="" />
+    </div>
+    <div class="pc-logo">
+      <div class="pc-logo-img">
+        <img src="./images/pc-logo.png" alt="" />
+      </div>
+    </div>
+    <div class="flexed">
+      <div class="wide-mobile">
+        <form action="./decrypting.html">
+          <div id="upload-container" class="container-2">
+          </div>
+
+          <button type="submit" class="login-button">Send to mail</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const uploadContainer = document.getElementById("upload-container");
+      const uploadInput = document.getElementById("image-upload");
+
+      uploadContainer.addEventListener("click", function () {
+        uploadInput.click();
+      });
+
+      uploadInput.addEventListener("change", function () {
+        // Handle the uploaded file here
+        console.log("File uploaded:", this.files[0]);
+      });
+    </script>
+  </body>
+</html>

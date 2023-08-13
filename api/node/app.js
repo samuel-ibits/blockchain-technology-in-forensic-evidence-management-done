@@ -18,7 +18,8 @@ const web3 = new Web3(
 // Set up Ethereum account and contract address
 const PrivateKey = process.env.YOUR_PRIVATE_KEY; // Replace with your private key
 const ContractAddress = process.env.YOUR_CONTRACT_ADDRESS; // Replace with your contract address
-const ContractABI = JSON.parse(process.env.YOUR_CONTRACT_ABI); // Replace with your contract ABI
+const ContractABI = ""
+// JSON.parse(process.env.YOUR_CONTRACT_ABI); // Replace with your contract ABI
 
 // Set up nodemailer with your email service provider credentials
 const transporter = nodemailer.createTransport({
@@ -79,78 +80,54 @@ console.log('newdata', encryptedData)
   }
 });
 
-// ... decrypt
 
-app.post("/decrypt", (req, res) => {
-  const form = new formidable.IncomingForm();
+// Decrypt endpoint
+app.post('/decrypt', upload.single('file'), async (req, res) => {
+  try {
+    const { encryptedData, privateKey } = req.body;
+console.log(req.body)
+    // Convert the encrypted data to a Buffer
+    const encryptedBuffer = Buffer.from(encryptedData, 'hex');
 
-  form.parse(req, (err, fields, files) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
+    // Use eth-crypto to decrypt the data
+    const decryptedBuffer = ethCrypto.decryptWithPrivateKey(privateKey, encryptedBuffer);
 
-    const { encryptedData, privateKey } = fields;
+    // Convert the decrypted Buffer to a string (assuming it's a string)
+    const decryptedData = decryptedBuffer.toString('utf-8');
 
-    try {
-      // Convert the encrypted data to a Buffer
-      const encryptedBuffer = Buffer.from(encryptedData, "hex");
-
-      // Use eth-crypto to decrypt the data
-      const decryptedBuffer = ethCrypto.decryptWithPrivateKey(
-        privateKey, // Your private key
-        encryptedBuffer
-      );
-
-      // Convert the decrypted Buffer to a string (assuming it's a string)
-      const decryptedData = decryptedBuffer.toString("utf-8");
-
-      res.status(200).json({ decryptedData });
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ error: "Decryption failed" });
-    }
-  });
+    res.status(200).json({ decryptedData });
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error: 'Decryption failed' });
+  }
 });
 
-// ... email
+// Send email endpoint
+app.post('/send-email', upload.single('file'), async (req, res) => {
+  try {
+    const { recipientEmail, encryptedData } = req.body;
 
-app.post("/send-email", async (req, res) => {
-  const form = new formidable.IncomingForm();
+    // Send the encrypted data as an attachment via email
+    const mailOptions = {
+      from: process.env.YOUR_EMAIL,
+      to: recipientEmail,
+      subject: 'Encrypted File',
+      text: 'The encrypted file is attached.',
+      attachments: [
+        {
+          filename: 'encrypted-file.txt',
+          content: encryptedData,
+        },
+      ],
+    };
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send("Internal Server Error");
-      return;
-    }
+    await transporter.sendMail(mailOptions);
 
-    const { recipientEmail, encryptedData } = fields;
-
-    try {
-      // Send the encrypted data as an attachment via email
-      const mailOptions = {
-        from: "YOUR_EMAIL",
-        to: recipientEmail,
-        subject: "Encrypted File",
-        text: "The encrypted file is attached.",
-        attachments: [
-          {
-            filename: "encrypted-file.txt",
-            content: encryptedData,
-          },
-        ],
-      };
-
-      await transporter.sendMail(mailOptions);
-
-      res.status(200).json({ success: true });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Email sending failed" });
-    }
-  });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Email sending failed' });
+  }
 });
 
 app.get("/", (req, res) => {
