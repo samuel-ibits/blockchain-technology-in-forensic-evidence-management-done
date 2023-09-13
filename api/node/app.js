@@ -1,27 +1,120 @@
 import express from "express";
 import multer from "multer";
-import fs from "fs";
+import ethCrypto from "eth-crypto";
 import Web3 from "web3";
 import nodemailer from "nodemailer";
-import ethCrypto from "eth-crypto"; // Import eth-crypto library
 import dotenv from "dotenv";
+import {ethers} from "ethers";
+// import { utils } from "ethers";
 
-// Load environment variables from .env
 dotenv.config();
+
 const app = express();
 const port = 3000;
 
 const web3 = new Web3(
-  `https://goerli.infura.io/v3/${process.env.YOUR_INFURA_PROJECT_ID}`
+  new Web3.providers.HttpProvider(
+    `https://rpc-mumbai.maticvigil.com/v1/${process.env.MUMBAI_MATICVIGIL_API_KEY}`
+  )
 );
 
-// Set up Ethereum account and contract address
-const PrivateKey = process.env.YOUR_PRIVATE_KEY; // Replace with your private key
-const ContractAddress = process.env.YOUR_CONTRACT_ADDRESS; // Replace with your contract address
-const ContractABI = ""
-// JSON.parse(process.env.YOUR_CONTRACT_ABI); // Replace with your contract ABI
+// Set up Web3 contract
+const contractAddress = process.env.YOUR_CONTRACT_ADDRESS; // Replace with your contract address
+// Replace with your contract ABI
+const contractABI =
+  [
+    {
+      inputs: [],
+      stateMutability: "nonpayable",
+      type: "constructor",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "user",
+          type: "address",
+        },
+      ],
+      name: "addAuthorizedUser",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      name: "authorizedUsers",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getEncryptedDocument",
+      outputs: [
+        {
+          internalType: "bytes32",
+          name: "",
+          type: "bytes32",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "owner",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "recipient",
+          type: "address",
+        },
+      ],
+      name: "shareEncryptedDocument",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "bytes32",
+          name: "documentHash",
+          type: "bytes32",
+        },
+      ],
+      name: "storeEncryptedDocument",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+  ]; 
 
-// Set up nodemailer with your email service provider credentials
+// Set up nodemailer
 const transporter = nodemailer.createTransport({
   service: process.env.YOUR_EMAIL_SERVICE,
   auth: {
@@ -31,91 +124,118 @@ const transporter = nodemailer.createTransport({
 });
 
 // Set up multer storage configuration
-const storage = multer.memoryStorage(); // Store files in memory
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 app.use(express.static("public"));
 
 // ... your /decrypt and /send-email endpoints
-app.post("/upload", upload.single("file"), async(req, res) => {
+
+app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const fileData = req.file.buffer;
-    const privateKey = PrivateKey; // Replace with your private key
-    const contractAddress = ContractAddress; // Replace with your contract address
-    const contractABI = ContractABI; // Replace with your contract ABI
+    const { ethAddress, 
+      privateKey 
+    } = req.body;
 
-
-    // Encrypt the file data using eth-crypto
+    // const privateKey = process.env.YOUR_PRIVATE_KEY;
     const publicKey = ethCrypto.publicKeyByPrivateKey(privateKey);
-    const encryptedData =await ethCrypto.encryptWithPublicKey(publicKey, fileData);
-console.log('newdata', encryptedData)
-    // Interact with the smart contract to store the encrypted data
+    const encryptedData = await ethCrypto.encryptWithPublicKey(
+      publicKey,
+      fileData
+    );
+
+    // Remove '0x' prefix and convert to bytes
+    const bytes = new TextEncoder().encode(encryptedData);
+
+    // Create a buffer of length 32 and copy the bytes
+    const buffer = new Uint8Array(32);
+    buffer.set(bytes);
+
+    // Convert buffer to hexadecimal string
+    const bytes32String =
+      "0x" + [...buffer].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+    // Convert the encrypted data to bytes32 format
+    const encodedEncryptedData = bytes32String;
+
+    console.log(encodedEncryptedData);
+
     const contract = new web3.eth.Contract(contractABI, contractAddress);
+   
 
-    // Request account access if needed (Note: This part might not work as-is in a Node.js environment)
-    web3.eth.getAccounts().then((accounts) => {
-      if (accounts.length > 0) {
-        const YOUR_ETHEREUM_ADDRESS = accounts[0];
-        console.log(`User's Ethereum address: ${YOUR_ETHEREUM_ADDRESS}`);
+    const YOUR_ETHEREUM_ADDRESS = ethAddress;
+    console.log(contract.methods);
+    // web3.eth.accounts.wallet.add(privateKey);
 
-        // Send the transaction to store encrypted data
-        contract.methods
-          .storeEncryptedFile(encryptedData)
-          .send({ from: YOUR_ETHEREUM_ADDRESS })
-          .on("transactionHash", (transactionHash) => {
-            res.status(200).json({ success: true, transactionHash });
-          })
-          .on("error", (error) => {
-            console.error(error);
-            res.status(500).json({ error: "Contract interaction failed" });
-          });
-      } else {
-        console.log("No Ethereum accounts found");
-        res.status(500).json({ error: "No Ethereum accounts found" });
-      }
-    });
+    //add user
+    await contract.methods
+      .addAuthorizedUser(ethAddress)
+      .send({ from: YOUR_ETHEREUM_ADDRESS });
+    res.status(200).json({ userAdded: true });
+    // store data
+    await contract.methods
+      .storeEncryptedDocument(encodedEncryptedData)
+      .send({ from: YOUR_ETHEREUM_ADDRESS });
+
+    res.status(200).json({ uploadsuccess: true });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error"  });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+async function convertStringToBytes32(inputString) {
+  try {
+    // Remove '0x' prefix and convert to bytes
+    const bytes = new TextEncoder().encode(inputString);
 
-// Decrypt endpoint
-app.post('/decrypt', upload.single('file'), async (req, res) => {
+    // Create a buffer of length 32 and copy the bytes
+    const buffer = new Uint8Array(32);
+    buffer.set(bytes);
+
+    // Convert buffer to hexadecimal string
+    const bytes32String =
+      "0x" + [...buffer].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+    return bytes32String;
+  } catch (error) {
+    console.error("Error:", error.message);
+    return null;
+  }
+}
+
+app.post("/decrypt", upload.single("file"), async (req, res) => {
   try {
     const { encryptedData, privateKey } = req.body;
-console.log(req.body)
-    // Convert the encrypted data to a Buffer
-    const encryptedBuffer = Buffer.from(encryptedData, 'hex');
 
-    // Use eth-crypto to decrypt the data
-    const decryptedBuffer = ethCrypto.decryptWithPrivateKey(privateKey, encryptedBuffer);
+    const encryptedBuffer = Buffer.from(encryptedData, "hex");
 
-    // Convert the decrypted Buffer to a string (assuming it's a string)
-    const decryptedData = decryptedBuffer.toString('utf-8');
+    const decryptedBuffer = ethCrypto.decryptWithPrivateKey(
+      privateKey,
+      encryptedBuffer
+    );
+    const decryptedData = decryptedBuffer.toString("utf-8");
 
     res.status(200).json({ decryptedData });
   } catch (error) {
     console.error(error);
-    res.status(400).json({ error: 'Decryption failed' });
+    res.status(400).json({ error: "Decryption failed" });
   }
 });
 
-// Send email endpoint
-app.post('/send-email', upload.single('file'), async (req, res) => {
+app.post("/send-email", upload.single("file"), async (req, res) => {
   try {
     const { recipientEmail, encryptedData } = req.body;
 
-    // Send the encrypted data as an attachment via email
     const mailOptions = {
       from: process.env.YOUR_EMAIL,
       to: recipientEmail,
-      subject: 'Encrypted File',
-      text: 'The encrypted file is attached.',
+      subject: "Encrypted File",
+      text: "The encrypted file is attached.",
       attachments: [
         {
-          filename: 'encrypted-file.txt',
+          filename: "encrypted-file.txt",
           content: encryptedData,
         },
       ],
@@ -126,7 +246,7 @@ app.post('/send-email', upload.single('file'), async (req, res) => {
     res.status(200).json({ success: true });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Email sending failed' });
+    res.status(500).json({ error: "Email sending failed" });
   }
 });
 

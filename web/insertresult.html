@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.1/web3.min.js"></script>
+    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Insert Result</title>
+    <title>Insert Report</title>
     <link rel="stylesheet" href="insertresult.css" />
   </head>
   <body>
@@ -17,28 +19,49 @@
     </div>
     <div class="flexed">
       <div class="wide-mobile">
-        <form action="./encrypting.html">
+        <form id="upload-form" enctype="multipart/form-data">
           <div id="upload-container" class="container">
-            <input type="file" id="image-upload" accept="image/*" />
+            <input type="file" name="file" required id="image-upload" accept="image/*" />
           </div>
 
-          <button type="submit" class="login-button">Upload</button>
+          <button type="submit" class="login-button" id="upload-button" onclick="connect()">Upload</button>
         </form>
       </div>
     </div>
+<script>
+/* To connect using MetaMask */
+  async function connect() {
 
-    <script>
-      const uploadContainer = document.getElementById("upload-container");
-      const uploadInput = document.getElementById("image-upload");
+    
 
-      uploadContainer.addEventListener("click", function () {
-        uploadInput.click();
-      });
+    if (window.ethereum) {
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      window.web3 = new Web3(window.ethereum);
+      const account = web3.eth.accounts;
+      //Get the current MetaMask selected/active wallet
+      const walletAddress = account.givenProvider.selectedAddress;
 
-      uploadInput.addEventListener("change", function () {
-        // Handle the uploaded file here
-        console.log("File uploaded:", this.files[0]);
-      });
-    </script>
+      const publicKey = await web3.eth.getPublicKey(accounts[0]);
+
+      console.log('Public Key:', publicKey);
+      console.log(`Wallet: ${walletAddress}`);
+
+    } else {
+      console.log("No wallet");
+    }
+  // Prepare the form data
+    const formData = new FormData();
+    formData.append("file", form.elements.file.files[0]);
+    formData.append("walletAddress", walletAddress);
+    formData.append("privateKey", walletAddress);
+
+    // Send the form data to your server
+    const response = await fetch("http://localhost:3000/upload", {
+      method: "POST",
+      body: formData
+    });
+ 
+ }
+</script>
   </body>
 </html>

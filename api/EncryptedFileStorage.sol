@@ -1,30 +1,55 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+/**
+   * @title SecureEncryptedDocumentStorage
+   * @dev SecureEncryptedDocumentStorage
+   */
 
-contract EncryptedFileStorage {
-    struct EncryptedFile {
-        bytes32 fileHash;
+contract SecureEncryptedDocumentStorage {
+    struct EncryptedDocument {
+        bytes32 documentHash;
         address owner;
         bool isShared;
     }
+ 
+     
+    mapping(address => EncryptedDocument) private encryptedDocuments;
+    mapping(address => bool) public authorizedUsers;
 
-    mapping(address => EncryptedFile) private encryptedFiles;
+    address public owner;
 
-    modifier onlyFileOwner() {
-        require(encryptedFiles[msg.sender].owner == msg.sender, "Not the file owner");
+    constructor() {
+        owner = msg.sender;
+        authorizedUsers[msg.sender] = true;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can perform this action");
         _;
     }
 
-    function storeEncryptedFile(bytes32 fileHash) external {
-        encryptedFiles[msg.sender] = EncryptedFile(fileHash, msg.sender, false);
+    modifier onlyAuthorized() {
+        require(authorizedUsers[msg.sender], "You are not authorized to perform this action");
+        _;
     }
 
-    function getEncryptedFile() external view onlyFileOwner returns (bytes32) {
-        return encryptedFiles[msg.sender].fileHash;
+    function addAuthorizedUser(address user) external onlyOwner {
+        authorizedUsers[user] = true;
     }
 
-    function shareEncryptedFile(address recipient) external onlyFileOwner {
-        require(!encryptedFiles[recipient].isShared, "File already shared");
-        encryptedFiles[recipient] = EncryptedFile(encryptedFiles[msg.sender].fileHash, recipient, true);
+    function storeEncryptedDocument(bytes32 documentHash) external onlyAuthorized {
+        encryptedDocuments[msg.sender] = EncryptedDocument(documentHash, msg.sender, false);
     }
+
+    function getEncryptedDocument() external view onlyAuthorized returns (bytes32) {
+        return encryptedDocuments[msg.sender].documentHash;
+    }
+
+    function shareEncryptedDocument(address recipient) external onlyAuthorized {
+        require(!encryptedDocuments[recipient].isShared, "Document already shared");
+        encryptedDocuments[recipient] = EncryptedDocument(encryptedDocuments[msg.sender].documentHash, recipient, true);
+    }
+
+
+    
 }
