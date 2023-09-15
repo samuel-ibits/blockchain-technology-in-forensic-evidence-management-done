@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.1/web3.min.js"></script>
@@ -14,17 +15,17 @@
     </div>
     <div class="pc-logo">
       <div class="pc-logo-img">
-        <img src="./images/pc-logo.png" alt="" />
+      <img src="./images/pc-logo.png" alt="" />
       </div>
     </div>
     <div class="flexed">
       <div class="wide-mobile">
         <form id="upload-form" enctype="multipart/form-data">
-          <div id="upload-container" class="container">
-            <input type="file" name="file" required id="image-upload" accept="image/*" />
-          </div>
+          <label for="image-upload"><div id="upload-container" class="container">
+          </div></label>
+            <input type="file" name="file" id="image-upload" accept="image/*" required />
 
-          <button type="submit" class="login-button" id="upload-button" onclick="connect()">Upload</button>
+          <button type="button" class="login-button" id="upload-button" onclick="connect()"  >Upload</button>
         </form>
       </div>
     </div>
@@ -33,33 +34,58 @@
   async function connect() {
 
     
-
+alert("clicked")
     if (window.ethereum) {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      window.web3 = new Web3(window.ethereum);
-      const account = web3.eth.accounts;
-      //Get the current MetaMask selected/active wallet
-      const walletAddress = account.givenProvider.selectedAddress;
 
-      const publicKey = await web3.eth.getPublicKey(accounts[0]);
 
-      console.log('Public Key:', publicKey);
-      console.log(`Wallet: ${walletAddress}`);
 
-    } else {
-      console.log("No wallet");
+       try {
+
+         await window.ethereum.request({ method: "eth_requestAccounts" });
+         window.web3 = new Web3(window.ethereum);
+         const web3account = web3.eth.accounts;
+         //Get the current MetaMask selected/active wallet
+         const walletAddress = web3account.givenProvider.selectedAddress;
+
+         console.log('Wallet', walletAddress);
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+        const account = accounts[0]
+
+        const publicKey = await window.ethereum.request({
+          method: 'eth_getEncryptionPublicKey',
+          params: [account],
+        })
+         console.log('Public Key:', publicKey);
+         // Prepare the form data
+
+         const formData = new FormData();
+         const fileInput = document.querySelector('input[type="file"]');
+         const file = fileInput.files[0];
+         console.log(file.name)
+
+         // append the file directly to a FormData
+         formData.append('file', file, file.name);
+         // formData.append("file", form.elements.file.files[0]);
+         formData.append("ethAddress", walletAddress);
+
+         if (!("TextEncoder" in window))
+           alert("Sorry, this browser does not support TextEncoder...");
+
+         var enc = new TextEncoder(); // always utf-8
+         var unitarray=enc.encode(publicKey);
+         formData.append("publicKey", unitarray);
+
+         // Send the form data to your server
+         const response = await fetch("http://localhost:3000/upload", {
+           method: "POST",
+           body: formData
+         });
+         console.log(response)
+      } catch (error) {
+        console.log("we3error",{ error })
+      }
     }
-  // Prepare the form data
-    const formData = new FormData();
-    formData.append("file", form.elements.file.files[0]);
-    formData.append("walletAddress", walletAddress);
-    formData.append("privateKey", walletAddress);
-
-    // Send the form data to your server
-    const response = await fetch("http://localhost:3000/upload", {
-      method: "POST",
-      body: formData
-    });
+      
  
  }
 </script>

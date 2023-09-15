@@ -11,6 +11,7 @@
     "dev": "nodemon app.js"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "eth-crypto": "^2.6.0",
     "ethers": "^6.7.1",

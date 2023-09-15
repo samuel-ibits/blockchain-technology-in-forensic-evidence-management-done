@@ -4,7 +4,9 @@ import ethCrypto from "eth-crypto";
 import Web3 from "web3";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import {ethers} from "ethers";
+import cors from "cors";
+
+import { ethers } from "ethers";
 // import { utils } from "ethers";
 
 dotenv.config();
@@ -21,98 +23,97 @@ const web3 = new Web3(
 // Set up Web3 contract
 const contractAddress = process.env.YOUR_CONTRACT_ADDRESS; // Replace with your contract address
 // Replace with your contract ABI
-const contractABI =
-  [
-    {
-      inputs: [],
-      stateMutability: "nonpayable",
-      type: "constructor",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "user",
-          type: "address",
-        },
-      ],
-      name: "addAuthorizedUser",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-      ],
-      name: "authorizedUsers",
-      outputs: [
-        {
-          internalType: "bool",
-          name: "",
-          type: "bool",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "getEncryptedDocument",
-      outputs: [
-        {
-          internalType: "bytes32",
-          name: "",
-          type: "bytes32",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "owner",
-      outputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "recipient",
-          type: "address",
-        },
-      ],
-      name: "shareEncryptedDocument",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "bytes32",
-          name: "documentHash",
-          type: "bytes32",
-        },
-      ],
-      name: "storeEncryptedDocument",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-  ]; 
+const contractABI = [
+  {
+    inputs: [],
+    stateMutability: "nonpayable",
+    type: "constructor",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+    ],
+    name: "addAuthorizedUser",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    name: "authorizedUsers",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getEncryptedDocument",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "recipient",
+        type: "address",
+      },
+    ],
+    name: "shareEncryptedDocument",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "documentHash",
+        type: "bytes32",
+      },
+    ],
+    name: "storeEncryptedDocument",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
 
 // Set up nodemailer
 const transporter = nodemailer.createTransport({
@@ -128,18 +129,17 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 app.use(express.static("public"));
-
+app.use(cors({ origin: "*" }));
 // ... your /decrypt and /send-email endpoints
 
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const fileData = req.file.buffer;
-    const { ethAddress, 
-      privateKey 
-    } = req.body;
+    const { ethAddress, publicKey } = req.body;
 
+    console.log("publickey", publicKey);
     // const privateKey = process.env.YOUR_PRIVATE_KEY;
-    const publicKey = ethCrypto.publicKeyByPrivateKey(privateKey);
+    // const publicKey = ethCrypto.publicKeyByPrivateKey(privateKey);
     const encryptedData = await ethCrypto.encryptWithPublicKey(
       publicKey,
       fileData
@@ -149,7 +149,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const bytes = new TextEncoder().encode(encryptedData);
 
     // Create a buffer of length 32 and copy the bytes
-    const buffer = new Uint8Array(32);
+    const buffer = new Uint8Array(33);
     buffer.set(bytes);
 
     // Convert buffer to hexadecimal string
@@ -162,7 +162,6 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     console.log(encodedEncryptedData);
 
     const contract = new web3.eth.Contract(contractABI, contractAddress);
-   
 
     const YOUR_ETHEREUM_ADDRESS = ethAddress;
     console.log(contract.methods);
