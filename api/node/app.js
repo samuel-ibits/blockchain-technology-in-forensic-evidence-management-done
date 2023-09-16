@@ -131,25 +131,31 @@ const upload = multer({ storage });
 app.use(express.static("public"));
 app.use(cors({ origin: "*" }));
 // ... your /decrypt and /send-email endpoints
-
 app.post("/upload", upload.single("file"), async (req, res) => {
   try {
     const fileData = req.file.buffer;
     const { ethAddress, publicKey } = req.body;
 
     console.log("publickey", publicKey);
-    // const privateKey = process.env.YOUR_PRIVATE_KEY;
-    // const publicKey = ethCrypto.publicKeyByPrivateKey(privateKey);
-    const encryptedData = await ethCrypto.encryptWithPublicKey(
-      publicKey,
-      fileData
-    );
+
+    // Ensure publicKey is a Uint8Array
+    // if (!(publicKey instanceof Uint8Array)) {
+    //   throw new Error("Invalid publicKey format");
+    // }
+    const newPublicKey = Uint8Array.from(publicKey);
+    console.log("newpublickey", newPublicKey);
+
+    // const encryptedData = await ethCrypto.encryptWithPublicKey(
+    //   newPublicKey,
+    //   fileData
+    // );
+    // console.log(encryptedData);
 
     // Remove '0x' prefix and convert to bytes
-    const bytes = new TextEncoder().encode(encryptedData);
+    const bytes = new TextEncoder().encode("encryptedData");
 
     // Create a buffer of length 32 and copy the bytes
-    const buffer = new Uint8Array(33);
+    const buffer = new Uint8Array(32);
     buffer.set(bytes);
 
     // Convert buffer to hexadecimal string
@@ -165,19 +171,35 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
     const YOUR_ETHEREUM_ADDRESS = ethAddress;
     console.log(contract.methods);
-    // web3.eth.accounts.wallet.add(privateKey);
+
+    // encoded = contract.methods.getReward().encodeABI();
+    // var block = await web3.eth.getBlock("latest");
+    // var gasLimit = Math.round(block.gasLimit / block.transactions.length);
+
+    // var tx = {
+    //   gas: gasLimit,
+    //   to: publicKey,
+    //   data: encoded,
+    // };
+
+    // web3.eth.accounts.signTransaction(tx, privateKey).then((signed) => {
+    //   web3.eth
+    //     .sendSignedTransaction(signed.rawTransaction)
+    //     .on("receipt", console.log);
+    // });
 
     //add user
-    await contract.methods
-      .addAuthorizedUser(ethAddress)
-      .send({ from: YOUR_ETHEREUM_ADDRESS });
-    res.status(200).json({ userAdded: true });
+    // await contract.methods
+    //   .addAuthorizedUser(ethAddress)
+    //   .send({ from: ethAddress });
+    // res.status(200).json({ userAdded: true });
+
     // store data
     await contract.methods
       .storeEncryptedDocument(encodedEncryptedData)
-      .send({ from: YOUR_ETHEREUM_ADDRESS });
+      .send({ from: ethAddress });
 
-    res.status(200).json({ uploadsuccess: true });
+    res.status(200).json({ uploadsuccess: true});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
