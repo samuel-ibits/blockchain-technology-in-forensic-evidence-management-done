@@ -9,12 +9,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Insert Report</title>
-    <!-- <link rel="stylesheet" href="insertresult.css" /> -->
+    <link rel="stylesheet" href="insertresult.css" />
 
 
   </head>
   <body>
-    <!-- <div class="top-section">
+    <div class="top-section">
       <img src="images/logo.png" alt="" srcset="" />
     </div>
     <div class="pc-logo">
@@ -27,22 +27,22 @@
         <form id="upload-form" enctype="multipart/form-data">
           <label for="image-upload"><div id="upload-container" class="container">
           </div></label>
-            <input type="file" name="file" id="image-upload" accept="image/*" required />
+            <input type="file" name="file" id="image-upload file-input" accept="image/*" required />
 
-          <button type="button" class="login-button" id="upload-button" onclick="run()"> Upload</button>
+          <button type="submit" class="login-button" id="upload-button" onclick="run()"> Upload</button>
         </form>
       </div>
-    </div> -->
+    </div>
 
 <!-- neww code -->
 
 
  
     <!-- Upload Document Form -->
-    <form id="upload-form"><br>
+    <!-- <form id="upload-form"><br>
       <input type="file" id="file-input" placeholder="file" accept=".pdf, .doc, .docx"/>
       <button type="submit">Upload Dapps</button>
-    </form>
+    </form> -->
 
  
     <!-- JavaScript Code -->
@@ -58,10 +58,6 @@
                 const file = fileInput.files[0];
 
 
-  // document.getElementById('encryptButton').addEventListener('click', async () => {
-  //   const fileInput = document.getElementById('fileInput');
-  //   const file = fileInput.files[0];
-
     if (!file) {
       alert('Please select a file.');
       return;
@@ -70,8 +66,10 @@
     try {
       const encryptedData = await encryptFile(file);
       console.log('Encrypted Data:', encryptedData);
+      const status= await uploadDocument(encryptedData);
+       console.log('Status:');
     } catch (error) {
-      console.error('Encryption Error:', error);
+      console.error('Error:', error);
     }
   }
   });
@@ -146,264 +144,246 @@
 
 
 
+  // Function to upload a document
+  async function uploadDocument(file) {
+    try {
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      const sender = accounts[0]; // Assuming you want the first account
+      console.log("sender", sender);
+
+      console.log('file', file);
+      // Assuming 'file' is a string representing the document hash
+      const documentHash = web3.utils.fromUtf8(file); // Convert to bytes32
+      console.log('documentHash', documentHash);
+      const receipt = await contract.methods
+        .uploadDocument(documentHash)
+        .send({ from: sender });
+              console.log("Transaction Receipt:");
+      console.log("Transaction Receipt:", receipt);
+      alert("Transaction Receipt: " + JSON.stringify(receipt));
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error: " + error.message);
+    }
+  }
 
 
+//function to interact with smart contract
+  // Check if Web3 is injected by MetaMask or another provider
+  if (typeof web3 !== "undefined") {
+    web3 = new Web3(web3.currentProvider);
+  } else {
+    // If no Web3 provider is found, fall back to a local development provider
+    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+  }
 
-////////////////////////////////////////////////NEW CODE/////
+  // Load your contract
+  const accounts = ethereum.request({
+    method: "eth_requestAccounts",
+  });
 
-//   // Check if Web3 is injected by MetaMask or another provider
-//   if (typeof web3 !== "undefined") {
-//     web3 = new Web3(web3.currentProvider);
-//   } else {
-//     // If no Web3 provider is found, fall back to a local development provider
-//     web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
-//   }
+  const contractAddress = "0xf841b18d6e57632910e7CfBc7ddf3bEfE0eB2006"; // Replace with your contract's address
+  const contractABI = [
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "name": "addAuthorizedUser",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          }
+        ],
+        "name": "DocumentShared",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "documentContent",
+            "type": "string"
+          }
+        ],
+        "name": "DocumentUploaded",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "recipient",
+            "type": "address"
+          }
+        ],
+        "name": "shareDocument",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "documentContent",
+            "type": "string"
+          }
+        ],
+        "name": "uploadDocument",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "name": "UserAuthorized",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "authorizedUsers",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getEncryptedDocument",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getOwner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "name": "isAuthorizedUser",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
 
-//   // Load your contract
-//   const accounts = ethereum.request({
-//     method: "eth_requestAccounts",
-//   });
+const contract = new web3.eth.Contract(contractABI, contractAddress);
 
-//   const contractAddress = "0xf841b18d6e57632910e7CfBc7ddf3bEfE0eB2006"; // Replace with your contract's address
-//   const contractABI = [
-//       {
-//         "inputs": [
-//           {
-//             "internalType": "address",
-//             "name": "user",
-//             "type": "address"
-//           }
-//         ],
-//         "name": "addAuthorizedUser",
-//         "outputs": [],
-//         "stateMutability": "nonpayable",
-//         "type": "function"
-//       },
-//       {
-//         "inputs": [],
-//         "stateMutability": "nonpayable",
-//         "type": "constructor"
-//       },
-//       {
-//         "anonymous": false,
-//         "inputs": [
-//           {
-//             "indexed": true,
-//             "internalType": "address",
-//             "name": "owner",
-//             "type": "address"
-//           },
-//           {
-//             "indexed": true,
-//             "internalType": "address",
-//             "name": "recipient",
-//             "type": "address"
-//           }
-//         ],
-//         "name": "DocumentShared",
-//         "type": "event"
-//       },
-//       {
-//         "anonymous": false,
-//         "inputs": [
-//           {
-//             "indexed": true,
-//             "internalType": "address",
-//             "name": "owner",
-//             "type": "address"
-//           },
-//           {
-//             "indexed": false,
-//             "internalType": "string",
-//             "name": "documentContent",
-//             "type": "string"
-//           }
-//         ],
-//         "name": "DocumentUploaded",
-//         "type": "event"
-//       },
-//       {
-//         "inputs": [
-//           {
-//             "internalType": "address",
-//             "name": "recipient",
-//             "type": "address"
-//           }
-//         ],
-//         "name": "shareDocument",
-//         "outputs": [],
-//         "stateMutability": "nonpayable",
-//         "type": "function"
-//       },
-//       {
-//         "inputs": [
-//           {
-//             "internalType": "string",
-//             "name": "documentContent",
-//             "type": "string"
-//           }
-//         ],
-//         "name": "uploadDocument",
-//         "outputs": [],
-//         "stateMutability": "nonpayable",
-//         "type": "function"
-//       },
-//       {
-//         "anonymous": false,
-//         "inputs": [
-//           {
-//             "indexed": true,
-//             "internalType": "address",
-//             "name": "user",
-//             "type": "address"
-//           }
-//         ],
-//         "name": "UserAuthorized",
-//         "type": "event"
-//       },
-//       {
-//         "inputs": [
-//           {
-//             "internalType": "address",
-//             "name": "",
-//             "type": "address"
-//           }
-//         ],
-//         "name": "authorizedUsers",
-//         "outputs": [
-//           {
-//             "internalType": "bool",
-//             "name": "",
-//             "type": "bool"
-//           }
-//         ],
-//         "stateMutability": "view",
-//         "type": "function"
-//       },
-//       {
-//         "inputs": [],
-//         "name": "getEncryptedDocument",
-//         "outputs": [
-//           {
-//             "internalType": "string",
-//             "name": "",
-//             "type": "string"
-//           }
-//         ],
-//         "stateMutability": "view",
-//         "type": "function"
-//       },
-//       {
-//         "inputs": [],
-//         "name": "getOwner",
-//         "outputs": [
-//           {
-//             "internalType": "address",
-//             "name": "",
-//             "type": "address"
-//           }
-//         ],
-//         "stateMutability": "view",
-//         "type": "function"
-//       },
-//       {
-//         "inputs": [
-//           {
-//             "internalType": "address",
-//             "name": "user",
-//             "type": "address"
-//           }
-//         ],
-//         "name": "isAuthorizedUser",
-//         "outputs": [
-//           {
-//             "internalType": "bool",
-//             "name": "",
-//             "type": "bool"
-//           }
-//         ],
-//         "stateMutability": "view",
-//         "type": "function"
-//       },
-//       {
-//         "inputs": [],
-//         "name": "owner",
-//         "outputs": [
-//           {
-//             "internalType": "address",
-//             "name": "",
-//             "type": "address"
-//           }
-//         ],
-//         "stateMutability": "view",
-//         "type": "function"
-//       }
-//     ];
+  // Function to get the encrypted document
+  async function getUploadedDocument() {
+    const owner = accounts; // Replace with the owner's address
+    try {
+      const encryptedDocument = await contract.methods
+        .getEncryptedDocument()
+        .call({
+          from: owner,             
+          to: owner,
+          value: web3.utils.toWei('0.1', 'ether'),
+          gas: 10000000, // Manually set the gas limit
+          gasPrice: web3.utils.toWei('100', 'gwei'), // Increase the gas price
+});
+      console.log("Encrypted Document:", encryptedDocument);
+      alert("Encrypted Document: " + encryptedDocument);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error: " + error.message);
+    }
+  }
 
-// const contract = new web3.eth.Contract(contractABI, contractAddress);
-
-//   // Function to get the encrypted document
-//   async function getUploadedDocument() {
-//     const owner = accounts; // Replace with the owner's address
-//     try {
-//       const encryptedDocument = await contract.methods
-//         .getEncryptedDocument()
-//         .call({ from: owner });
-//       console.log("Encrypted Document:", encryptedDocument);
-//       alert("Encrypted Document: " + encryptedDocument);
-//     } catch (error) {
-//       console.error("Error:", error);
-//       alert("Error: " + error.message);
-//     }
-//   }
-
-//   // Function to upload a document
-//   async function uploadDocument(file) {
-//     try {
-//       const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-//       const sender = accounts[0]; // Assuming you want the first account
-//       console.log("sender", sender);
-
-//       console.log('file',file);
-//       // Assuming 'file' is a string representing the document hash
-//       const documentHash = web3.utils.fromUtf8(file); // Convert to bytes32
-// console.log('documentHash', documentHash);
-//       const receipt = await contract.methods
-//         .uploadDocument(documentHash)
-//         .send({ from: sender });
-//       console.log("Transaction Receipt:", receipt);
-//       alert("Transaction Receipt: " + JSON.stringify(receipt));
-//     } catch (error) {
-//       console.error("Error:", error);
-//       alert("Error: " + error.message);
-//     }
-//   }
+ 
 
 
-
-//       // Event listener for the upload form
-//       const uploadForm = document.getElementById('upload-form');
-//       uploadForm.addEventListener('submit', async (event) => {
-//         event.preventDefault();
-//         const fileInput = document.getElementById('file-input');
-//         const file = fileInput.files[0];
-
-// if (file) {
-//                 const reader = new FileReader();
-
-//               reader.onload = function (e) {
-//     const fileContents = e.target.result;
-//     const base64String = fileContents.split(',')[1];
-//     // console.log('Base64 string:', base64String);
-//       uploadDocument(base64String);
-//   };
-
-// reader.readAsDataURL(file);
-
-           
-     
-//         }
-//       });
 
     </script>
 
