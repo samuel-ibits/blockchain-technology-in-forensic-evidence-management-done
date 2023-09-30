@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View File</title>
+    <link rel="stylesheet" href="insertresult.css" />
+  </head>
+  <body>
+    <div class="top-section">
+      <img src="images/logo.png" alt="" srcset="" />
+    </div>
+    <div class="pc-logo">
+      <div class="pc-logo-img">
+        <img src="./images/pc-logo.png" alt="" />
+      </div>
+    </div>
+    <div class="flexed">
+      <div class="wide-mobile">
+        <form action="./decrypting.html">
+          <div id="upload-container" class="container-2">
+          </div>
+
+          <button type="submit" id ="retrieveDataButton" class="login-button">View File</button>
+        </form>
+      </div>
+    </div>
+<script>
+        // Check if Web3 is injected by MetaMask or another provider
+          if (typeof web3 !== "undefined") {
+            web3 = new Web3(web3.currentProvider);
+          } else {
+            // If no Web3 provider is found, fall back to a local development provider
+            web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+          }
+
+          // Load your contract
+          const accounts = ethereum.request({
+            method: "eth_requestAccounts",
+          });
+
+          const contractAddress = "0xf841b18d6e57632910e7CfBc7ddf3bEfE0eB2006"; // Replace with your contract's address
+          const contractABI = [
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                }
+              ],
+              "name": "addAuthorizedUser",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "stateMutability": "nonpayable",
+              "type": "constructor"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                }
+              ],
+              "name": "DocumentShared",
+              "type": "event"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "owner",
+                  "type": "address"
+                },
+                {
+                  "indexed": false,
+                  "internalType": "string",
+                  "name": "documentContent",
+                  "type": "string"
+                }
+              ],
+              "name": "DocumentUploaded",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "recipient",
+                  "type": "address"
+                }
+              ],
+              "name": "shareDocument",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "string",
+                  "name": "documentContent",
+                  "type": "string"
+                }
+              ],
+              "name": "uploadDocument",
+              "outputs": [],
+              "stateMutability": "nonpayable",
+              "type": "function"
+            },
+            {
+              "anonymous": false,
+              "inputs": [
+                {
+                  "indexed": true,
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                }
+              ],
+              "name": "UserAuthorized",
+              "type": "event"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "name": "authorizedUsers",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getEncryptedDocument",
+              "outputs": [
+                {
+                  "internalType": "string",
+                  "name": "",
+                  "type": "string"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "getOwner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [
+                {
+                  "internalType": "address",
+                  "name": "user",
+                  "type": "address"
+                }
+              ],
+              "name": "isAuthorizedUser",
+              "outputs": [
+                {
+                  "internalType": "bool",
+                  "name": "",
+                  "type": "bool"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            },
+            {
+              "inputs": [],
+              "name": "owner",
+              "outputs": [
+                {
+                  "internalType": "address",
+                  "name": "",
+                  "type": "address"
+                }
+              ],
+              "stateMutability": "view",
+              "type": "function"
+            }
+          ];
+
+        // Create a contract instance
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        // Button click event handler
+        document.getElementById('retrieveDataButton').addEventListener('click', async () => {
+            try {
+                // Replace this with your contract's specific function call
+                const result = await contract.methods
+                .getEncryptedDocument()
+                .call({
+                    from: owner,
+                    to: owner,
+                    value: web3.utils.toWei('0.1', 'ether'),
+                    gas: 10000000, // Manually set the gas limit
+                    gasPrice: web3.utils.toWei('100', 'gwei'), // Increase the gas price
+                  });
+                
+                // // Process the result (assuming it's an array of encrypted data)
+                // const encryptedDataDiv = document.getElementById('encryptedData');
+                // encryptedDataDiv.innerHTML = '';
+                // result.forEach((data, index) => {
+                //     encryptedDataDiv.innerHTML += `<p>Data ${index + 1}: ${data}</p>`;
+                // });
+
+                console.log(result);
+            } catch (error) {
+                console.error('Error retrieving data:', error);
+            }
+        });
+    </script>
+  
+  </body>
+</html>

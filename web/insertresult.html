@@ -67,7 +67,8 @@
       const encryptedData = await encryptFile(file);
       console.log('Encrypted Data:', encryptedData);
       const status= await uploadDocument(encryptedData);
-       console.log('Status:');
+       console.log('Status:', status);
+       if(status){window.location.replace('encrypting.html')}
     } catch (error) {
       console.error('Error:', error);
     }
