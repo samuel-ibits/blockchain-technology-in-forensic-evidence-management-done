@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script src="https://c0f4f41c-2f55-4863-921b-sdk-docs.github.io/cdn/metamask-sdk.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/3.0.0/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
@@ -8,53 +11,240 @@
   </head>
   <body>
     <div class="container">
-      <h2>Login</h2>
-      <form action="./insertresult.html">
+      <h2>Authorize Users</h2>
+      <form action="">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="address">Wallet Adddress</label>
           <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Email"
+            type="address"
+            id="address"
+            name="address"
+            placeholder="0x34....."
             required
           />
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Password"
-            required
-          />
-        </div>
-        <div class="remember-forgot">
-          <div class="toggle-container">
-            <label>
-              <input type="checkbox" id="toggle-checkbox" />
-            </label>
-            <p id="toggle-status">Don't reminder me</p>
-          </div>
-          <a href="#">Forgot password?</a>
-        </div>
-        <button type="submit" class="login-button">Login</button>
+        
+        
+        <button type="submit" id="retrieveDataButton" class="login-button">Authurise</button>
       </form>
     </div>
-    <p class="signup-link">Don't have an account? <a href="#">Signup</a></p>
+<script>
 
-    <script>
-      const toggleCheckbox = document.getElementById("toggle-checkbox");
-      const toggleStatus = document.getElementById("toggle-status");
 
-      toggleCheckbox.addEventListener("change", function () {
-        if (this.checked) {
-          toggleStatus.textContent = "Remember me";
-        } else {
-          toggleStatus.textContent = "Don't remember me";
+
+  // Check if Web3 is injected by MetaMask or another provider
+  if (typeof web3 !== "undefined") {
+    web3 = new Web3(web3.currentProvider);
+  } else {
+    // If no Web3 provider is found, fall back to a local development provider
+    web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+  }
+
+  // Load your contract
+  const accounts = ethereum.request({
+    method: "eth_requestAccounts",
+  });
+  const owner = accounts[0];
+  console.log(owner);
+  const contractAddress = "0xf841b18d6e57632910e7CfBc7ddf3bEfE0eB2006"; // Replace with your contract's address
+  const contractABI = [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
         }
-      });
-    </script>
+      ],
+      "name": "addAuthorizedUser",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "DocumentShared",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "documentContent",
+          "type": "string"
+        }
+      ],
+      "name": "DocumentUploaded",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        }
+      ],
+      "name": "shareDocument",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "documentContent",
+          "type": "string"
+        }
+      ],
+      "name": "uploadDocument",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "UserAuthorized",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "authorizedUsers",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getEncryptedDocument",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getOwner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "isAuthorizedUser",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ];
+
+  // Create a contract instance
+  const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+  // Button click event handler
+  document.getElementById('retrieveDataButton').addEventListener('click', async (event) => {
+    event.preventDefault();
+    const fileInput = document.getElementById('address');
+    try {
+      // Replace this with your contract's specific function call
+      const result = await contract.methods
+        .authorizedUsers(fileInput)
+        .call({
+          from: owner,
+
+        });
+
+     
+
+      console.log(result);
+    } catch (error) {
+      console.error('Error retrieving data:', error);
+    }
+  });
+</script>
   </body>
 </html>

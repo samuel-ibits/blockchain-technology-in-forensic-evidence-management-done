@@ -235,10 +235,7 @@
                 .getEncryptedDocument()
                 .call({
                     from: owner,
-                    to: owner,
-                    value: web3.utils.toWei('0.1', 'ether'),
-                    gas: 10000000, // Manually set the gas limit
-                    gasPrice: web3.utils.toWei('100', 'gwei'), // Increase the gas price
+                   
                   });
                 
                 // // Process the result (assuming it's an array of encrypted data)
